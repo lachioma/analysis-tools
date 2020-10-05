@@ -26,5 +26,7 @@ for e = 1:length(times_ev_rising)
     sync(ts_inds) = true;
 end
 
+t_vec = double(timestamps_continuous-timestamps_continuous(1)) / E.Header.sample_rate;
+
 figure;
-area((timestamps_continuous-timestamps_continuous(1)) / E.Header.sample_rate, sync)
+area(t_vec, sync)
