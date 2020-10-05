@@ -14,14 +14,26 @@ filename_oebin = fullfile(path, file);
 Lc = list_open_ephys_binary(filename_oebin, 'continuous');
 Le = list_open_ephys_binary(filename_oebin, 'events');
 
-%%
+idx_Lc_Neuropix_AP  = find(contains(Lc,'Neuropix') & contains(Lc,'.0'));
+idx_Lc_Neuropix_LFP = find(contains(Lc,'Neuropix') & contains(Lc,'.1'));
+idx_Lc_NIdaq        = find(contains(Lc,'NI-DAQ'));
+idx_Le_Neuropix     = find(contains(Le,'Neuropix') & contains(Le,'.0'));
+idx_Le_NIdaq        = find(contains(Le,'NI-DAQ'));
 
-index_
+%%
 % Load data recorded by Open Ephys in binary format:
-D = load_open_ephys_binary(filename_oebin, 'continuous', 1);
-E = load_open_ephys_binary(filename_oebin, 'events', 1);
+D_AP  = load_open_ephys_binary(filename_oebin, 'continuous', idx_Lc_Neuropix_AP);
+D_LFP = load_open_ephys_binary(filename_oebin, 'continuous', idx_Lc_Neuropix_LFP);
+D_daq = load_open_ephys_binary(filename_oebin, 'continuous', idx_Lc_NIdaq);
+%
+E_NP  = load_open_ephys_binary(filename_oebin, 'events', idx_Le_Neuropix);
+E_daq = load_open_ephys_binary(filename_oebin, 'events', idx_Le_NIdaq);
 
 %%
 
 figure
-plot(D.Data(1,:))
+plot(D_AP.Data(1,:))
+
+zeropads = find(D_AP.Data(1,:) == 0);
+length(D_AP.Timestamps) + length(zeropads)
+length(D_AP.Data)
