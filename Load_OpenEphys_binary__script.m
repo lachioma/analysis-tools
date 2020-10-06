@@ -24,16 +24,22 @@ idx_Le_NIdaq        = find(contains(Le,'NI-DAQ'));
 % Load data recorded by Open Ephys in binary format:
 D_AP  = load_open_ephys_binary(filename_oebin, 'continuous', idx_Lc_Neuropix_AP);
 D_LFP = load_open_ephys_binary(filename_oebin, 'continuous', idx_Lc_Neuropix_LFP);
-D_daq = load_open_ephys_binary(filename_oebin, 'continuous', idx_Lc_NIdaq);
+% D_daq = load_open_ephys_binary(filename_oebin, 'continuous', idx_Lc_NIdaq);
 %
 E_NP  = load_open_ephys_binary(filename_oebin, 'events', idx_Le_Neuropix);
-E_daq = load_open_ephys_binary(filename_oebin, 'events', idx_Le_NIdaq);
+% E_daq = load_open_ephys_binary(filename_oebin, 'events', idx_Le_NIdaq);
 
 %%
 
 figure
 plot(D_AP.Data(1,:))
-
+hold on
 zeropads = find(D_AP.Data(1,:) == 0);
-length(D_AP.Timestamps) + length(zeropads)
-length(D_AP.Data)
+plot(zeropads, zeros(length(zeropads),1),'o')
+
+
+% zeropads = find(D_AP.Data(1,:) == 0);
+% length(D_AP.Timestamps) + length(zeropads)
+length(D_AP.Timestamps) - length(D_AP.Data)
+
+length(D_AP.Data) - find(D_AP.Data(1,:) > 0, 1,'last')
