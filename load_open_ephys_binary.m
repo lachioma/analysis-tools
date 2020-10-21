@@ -1,5 +1,5 @@
-function D=load_open_ephys_binary(jsonFile, type, index, varargin)
-%function D=load_open_ephys_binary(oebinFile, type, index)
+function D = load_open_ephys_binary(jsonFile, type, index, varargin)
+%function D = load_open_ephys_binary(oebinFile, type, index)
 %
 %Loads data recorded by Open Ephys in Binary format
 %  oebinFile: The path for the structure.oebin json file
@@ -37,6 +37,12 @@ function D=load_open_ephys_binary(jsonFile, type, index, varargin)
 %from npy-matlab package from kwik-team
 %(https://github.com/kwikteam/npy-matlab)
 %Requires minimum MATLAB version: R2016b
+
+if isempty(index)
+    disp('index is empty, nothing to load')
+    D = [];
+    return
+end
 
 if (exist('readNPY.m','file') == 0)
     error('OpenEphys:loadBinary:npyLibraryNotfound','readNPY not found. Please be sure that npy-matlab is accessible');
@@ -119,6 +125,7 @@ switch type
            D.Data = readNPY(fullfile(folder,'data_array.npy'));
         end       
 end
+
 metadatafile = fullfile(folder,'metadata.npy');
 if (isfile(metadatafile))
     try
@@ -130,4 +137,6 @@ if (isfile(metadatafile))
         end
     end
 end
+
+disp('Data loaded!')
 end
