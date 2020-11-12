@@ -20,6 +20,8 @@ idx_Lc_NIdaq        = find(contains(Lc,'NI-DAQ'));
 idx_Le_Neuropix     = find(contains(Le,'Neuropix') & contains(Le,'.0'));
 idx_Le_NIdaq        = find(contains(Le,'NI-DAQ'));
 
+disp('  Loaded!')
+disp(' ')
 %%
 % Load data recorded by Open Ephys in binary format:
 D_AP  = load_open_ephys_binary(filename_oebin, 'continuous', idx_Lc_Neuropix_AP);
