@@ -4,10 +4,10 @@
 folder_root_data = 'D:\data_test\';
 
 disp(' ')
-disp('  Select data files...')
+disp('  Select data structure file...')
 
 [file,path] = uigetfile([folder_root_data  '*.oebin'],...
-    'Select data file...');
+    'Select data structure file...');
 filename_oebin = fullfile(path, file);
 
 % List the elements present in a Open Ephys binary format:
