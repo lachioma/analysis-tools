@@ -108,22 +108,39 @@ switch type
         D.ElectrodeIndexes = readNPY(fullfile(folder,'spike_electrode_indices.npy'));
         D.SortedIndexes = readNPY(fullfile(folder,'spike_clusters.npy'));
     case 'events'
+        % timestamps.npy changed in OpenEphys GUI version 0.6.x and
+        % contains actual timestamps, whereas  versions < 0.6.x contained
+        % sample numbers.
         D.Timestamps = readNPY(fullfile(folder,'timestamps.npy'));
-        D.ChannelIndex = readNPY(fullfile(folder,'channels.npy'));
+        if isfile(fullfile(folder,'sample_numbers.npy'))
+            D.SampleNumbers = readNPY(fullfile(folder,'sample_numbers.npy'));
+        end
         f=java.io.File(folder);
         group=char(f.getName());
         if (strncmp(group,'TEXT',4))
             %D.Data = readNPY(fullfile(folder,'text.npy'));
             warning('TEXT files not supported by npy library');
         elseif (strncmp(group,'TTL',3))
-            D.Data = readNPY(fullfile(folder,'channel_states.npy'));
+            % channel_states.npy changed name to states.npy in OpenEphys GUI version 0.6.x
+            states_file = fullfile(folder,'states.npy'); 
+            if ~isfile(states_file)
+                states_file = fullfile(folder,'channel_states.npy');
+                assert(isfile(states_file),'Neither ''states.npy'' nor ''channel_states.npy'' was found in %s', folder)
+            end
+            D.Data = readNPY(states_file);
             wordfile = fullfile(folder,'full_words.npy');
             if (isfile(wordfile))
                 D.FullWords = readNPY(wordfile);
             end
         elseif (strncmp(group,'BINARY',6))
            D.Data = readNPY(fullfile(folder,'data_array.npy'));
-        end       
+        end
+        if isfile(fullfile(folder,'channels.npy')) % channels.npy is generated only by OpenEphys GUI versions < 0.6.x
+            D.ChannelIndex = readNPY(fullfile(folder,'channels.npy'));
+        else
+            D.ChannelIndex = uint16(D.Data);
+        end
+      
 end
 
 metadatafile = fullfile(folder,'metadata.npy');
