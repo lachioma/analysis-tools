@@ -89,9 +89,29 @@ folder = char(f.getCanonicalPath());
 D=struct();
 D.Header = header;
 
+% Get Open Ephys version
+path_split = strsplit(folder,filesep);
+settings_xml_path = fullfile(path_split{1: find(contains(path_split, 'Record Node'))}, 'settings.xml');
+t = fileread(settings_xml_path);
+[~,ix1] = regexp(t, '<VERSION>');
+[ix2]   = regexp(t, '</VERSION>');
+ver_str = t(ix1+1:ix2-1);
+ver_num = str2double(ver_str(1))*1 + str2double(ver_str(3))*0.1 + str2double(ver_str(5))*0.01;
+
+
 switch type
     case 'continuous'
-        D.Timestamps = readNPY(fullfile(folder,'timestamps.npy'));
+        % timestamps.npy changed in OpenEphys GUI version 0.6.x and
+        % contains actual timestamps, whereas  versions < 0.6.x contained
+        % sample numbers.
+        if ver_num < 0.6
+            D.SampleNumbers = readNPY(fullfile(folder,'timestamps.npy'));
+            D.Timestamps    = D.SampleNumbers / header.sample_rate;
+        else
+            D.Timestamps = readNPY(fullfile(folder,'timestamps.npy'));
+            D.SampleNumbers = readNPY(fullfile(folder,'sample_numbers.npy'));
+        end
+        
         contFile=fullfile(folder,'continuous.dat');
         if (continuousmap)
             file=dir(contFile);
@@ -111,8 +131,11 @@ switch type
         % timestamps.npy changed in OpenEphys GUI version 0.6.x and
         % contains actual timestamps, whereas  versions < 0.6.x contained
         % sample numbers.
-        D.Timestamps = readNPY(fullfile(folder,'timestamps.npy'));
-        if isfile(fullfile(folder,'sample_numbers.npy'))
+        if ver_num < 0.6
+            D.SampleNumbers = readNPY(fullfile(folder,'timestamps.npy'));
+            D.Timestamps    = D.SampleNumbers / header.sample_rate;
+        else
+            D.Timestamps = readNPY(fullfile(folder,'timestamps.npy'));
             D.SampleNumbers = readNPY(fullfile(folder,'sample_numbers.npy'));
         end
         f=java.io.File(folder);
@@ -122,11 +145,12 @@ switch type
             warning('TEXT files not supported by npy library');
         elseif (strncmp(group,'TTL',3))
             % channel_states.npy changed name to states.npy in OpenEphys GUI version 0.6.x
-            states_file = fullfile(folder,'states.npy'); 
-            if ~isfile(states_file)
+            if ver_num < 0.6
                 states_file = fullfile(folder,'channel_states.npy');
-                assert(isfile(states_file),'Neither ''states.npy'' nor ''channel_states.npy'' was found in %s', folder)
+            else
+                states_file = fullfile(folder,'states.npy'); 
             end
+            assert(isfile(states_file),'Neither ''states.npy'' nor ''channel_states.npy'' was found in %s', folder)
             D.Data = readNPY(states_file);
             wordfile = fullfile(folder,'full_words.npy');
             if (isfile(wordfile))
@@ -135,10 +159,11 @@ switch type
         elseif (strncmp(group,'BINARY',6))
            D.Data = readNPY(fullfile(folder,'data_array.npy'));
         end
-        if isfile(fullfile(folder,'channels.npy')) % channels.npy is generated only by OpenEphys GUI versions < 0.6.x
+        % channels.npy is generated only by OpenEphys GUI versions < 0.6.x
+        if isfile(fullfile(folder,'channels.npy'))
             D.ChannelIndex = readNPY(fullfile(folder,'channels.npy'));
         else
-            D.ChannelIndex = uint16(D.Data);
+            D.ChannelIndex = uint16(abs(D.Data));
         end
       
 end
