@@ -106,7 +106,7 @@ switch type
         % sample numbers.
         if ver_num < 0.6
             D.SampleNumbers = readNPY(fullfile(folder,'timestamps.npy'));
-            D.Timestamps    = D.SampleNumbers / header.sample_rate;
+            D.Timestamps    = double(D.SampleNumbers) / double(header.sample_rate);
         else
             D.Timestamps = readNPY(fullfile(folder,'timestamps.npy'));
             D.SampleNumbers = readNPY(fullfile(folder,'sample_numbers.npy'));
@@ -133,7 +133,7 @@ switch type
         % sample numbers.
         if ver_num < 0.6
             D.SampleNumbers = readNPY(fullfile(folder,'timestamps.npy'));
-            D.Timestamps    = D.SampleNumbers / header.sample_rate;
+            D.Timestamps    = double(D.SampleNumbers) / double(header.sample_rate);
         else
             D.Timestamps = readNPY(fullfile(folder,'timestamps.npy'));
             D.SampleNumbers = readNPY(fullfile(folder,'sample_numbers.npy'));
