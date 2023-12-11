@@ -91,7 +91,9 @@ D.Header = header;
 
 % Get Open Ephys version
 path_split = strsplit(folder,filesep);
-settings_xml_path = fullfile(path_split{1: find(contains(path_split, 'Record Node'))}, 'settings.xml');
+% settings_xml_path = fullfile(path_split{1: find(contains(path_split, 'Record Node'))}, 'settings.xml');
+settings_xml_ls = dir( fullfile(path_split{1: find(contains(path_split, 'Record Node'))}, 'settings??.xml') ); % it can be settings.xml, settings_2.xml, etc.
+settings_xml_path = fullfile(settings_xml_ls.folder, settings_xml_ls.name);
 t = fileread(settings_xml_path);
 [~,ix1] = regexp(t, '<VERSION>');
 [ix2]   = regexp(t, '</VERSION>');
