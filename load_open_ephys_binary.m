@@ -101,6 +101,26 @@ ver_str = t(ix1+1:ix2-1);
 ver_num = str2double(ver_str(1))*1 + str2double(ver_str(3))*0.1 + str2double(ver_str(5))*0.01;
 
 
+% % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % 
+% Are you performing the synchronization of Imec and NI-Daq clocks offline?
+% 
+% This is critical for OpenEphys GUI version >= 0.6.x. 
+% 
+% Open Ephys will try to sync the two clocks online, even when using
+% Arduino barcodes. However, the online sync is not accurate and will
+% result in wrong extraction of barcodes from the slave (NI-daq) clock and
+% misalignment of TTL events (e.g. sound events). In OpenEphys GUI version
+% < 0.6.x, the synced timestamps were saved on a separate
+% synchronized_timestamps.npy; however, from version 0.6.x, there is no
+% separate files and timestamps.npy contains the synced timestamps.
+% 
+% web('https://open-ephys.github.io/gui-docs/Tutorials/Data-Synchronization.html')
+% 
+% Sync = 'online';
+Sync = 'offline';
+% 
+% % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % 
+
 switch type
     case 'continuous'
         % timestamps.npy changed in OpenEphys GUI version 0.6.x and
@@ -110,8 +130,14 @@ switch type
             D.SampleNumbers = readNPY(fullfile(folder,'timestamps.npy'));
             D.Timestamps    = double(D.SampleNumbers) / double(header.sample_rate);
         else
-            D.Timestamps = readNPY(fullfile(folder,'timestamps.npy'));
-            D.SampleNumbers = readNPY(fullfile(folder,'sample_numbers.npy'));
+            if strcmp(Sync, 'online')
+                D.Timestamps    = readNPY(fullfile(folder,'timestamps.npy'));
+                D.SampleNumbers = readNPY(fullfile(folder,'sample_numbers.npy'));
+            else
+                D.SampleNumbers = readNPY(fullfile(folder,'sample_numbers.npy'));
+                D.Timestamps    = double(D.SampleNumbers) / double(header.sample_rate);
+            end
+                
         end
         
         contFile=fullfile(folder,'continuous.dat');
@@ -137,8 +163,13 @@ switch type
             D.SampleNumbers = readNPY(fullfile(folder,'timestamps.npy'));
             D.Timestamps    = double(D.SampleNumbers) / double(header.sample_rate);
         else
-            D.Timestamps = readNPY(fullfile(folder,'timestamps.npy'));
-            D.SampleNumbers = readNPY(fullfile(folder,'sample_numbers.npy'));
+            if strcmp(Sync, 'online')
+                D.Timestamps    = readNPY(fullfile(folder,'timestamps.npy'));
+                D.SampleNumbers = readNPY(fullfile(folder,'sample_numbers.npy'));
+            else
+                D.SampleNumbers = readNPY(fullfile(folder,'sample_numbers.npy'));
+                D.Timestamps    = double(D.SampleNumbers) / double(header.sample_rate);
+            end
         end
         f=java.io.File(folder);
         group=char(f.getName());
